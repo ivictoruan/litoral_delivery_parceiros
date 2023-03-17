@@ -2,9 +2,16 @@ import 'package:litoral_delivery_parceiros/app/core/ui/styles/text_styles.dart';
 import 'package:flutter/material.dart';
 
 class CustomWillPopScope extends StatelessWidget {
+  final String message;
+  final String routeToBack;
   final Widget child;
 
-  const CustomWillPopScope({super.key, required this.child});
+  const CustomWillPopScope({
+    super.key,
+    required this.child,
+    required this.message,
+    required this.routeToBack,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +23,7 @@ class CustomWillPopScope extends StatelessWidget {
             return AlertDialog(
               title: Center(
                 child: Text(
-                  'Voltar para o início?',
+                  message,
                   style: context.textStyles.textTitle.copyWith(
                     fontSize: 16,
                   ),
@@ -29,7 +36,7 @@ class CustomWillPopScope extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/');
+                    Navigator.pushNamed(context, routeToBack);
                   },
                   child: const Text('Sim'),
                 ),
