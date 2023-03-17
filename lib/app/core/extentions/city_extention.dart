@@ -1,4 +1,3 @@
-
 import '../../models/address_model.dart';
 
 extension CityExtension on City {
@@ -23,5 +22,9 @@ extension CityExtension on City {
       default:
         return "";
     }
+  }
+
+  Map<String, dynamic> toMap() {
+    return {'name': toString().split('.').last};
   }
 }
