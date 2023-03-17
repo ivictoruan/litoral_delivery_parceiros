@@ -1,242 +1,203 @@
-// import 'package:litoral_delivery_parceiros/app/core/extentions/capitalize_extention.dart';
-// import 'package:litoral_delivery_parceiros/app/core/ui/styles/text_styles.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-// import 'package:validatorless/validatorless.dart';
+import 'package:litoral_delivery_parceiros/app/core/ui/styles/text_styles.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-// import '../../../core/formatter/phone_input_formatter.dart';
-// import '../../../models/organization_model.dart';
+import '../../../core/ui/widgets/custom_will_pop_scope.dart';
+import 'controller/register_controller.dart';
+import 'steps/additional_infos_form_content.dart';
+import 'steps/basic_infos_form_content.dart';
+import 'steps/confirm_step.dart';
+import 'steps/localization_form_content.dart';
 
-// class RegisterPage extends StatefulWidget {
-//   const RegisterPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
-//   @override
-//   State<RegisterPage> createState() => _RegisterPageState();
-// }
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
 
-// class _RegisterPageState extends State<RegisterPage> {
-//   final _formKey = GlobalKey<FormState>();
+class _RegisterPageState extends State<RegisterPage> {
+  final _formKeyBasicInfos = GlobalKey<FormState>();
+  final _formKeyAddress = GlobalKey<FormState>();
+  final _formKeyAdditionalInfo = GlobalKey<FormState>();
 
-//   final GlobalKey<FormFieldState<String>> _categoriaFormFieldKey =
-//       GlobalKey<FormFieldState<String>>();
+  final _formKeyConfirm = GlobalKey<FormState>();
 
-//   final _organizationNameEC = TextEditingController();
-//   final _emailEC = TextEditingController();
-//   final _passwordEC = TextEditingController();
-//   final _numberController = TextEditingController();
+  // void _saveValues(formKey) {
+  //   formKey.currentState.save();
+  // }
 
-//   OrganizationCategory _categoriaSelecionada = OrganizationCategory.lanchonete;
+  int _currentStep = 0;
+  // _stepTapped(int step) { //! REVER ESTA FUNÇÃO!
+  //   setState(() => _currentStep = step);
+  // }
 
-//   var _showPassword = false;
+  _stepContinue() {
+    RegisterController controller =
+        Provider.of<RegisterController>(context, listen: false);
+    switch (_currentStep) {
+      case 0:
+        bool validBasic = _formKeyBasicInfos.currentState?.validate() ?? false;
+        if (validBasic) {
+          // _saveValues(_formKeyBasicInfos);
+          _currentStep < 1 ? setState(() => _currentStep += 1) : null;
+        }
+        break;
+      case 1:
+        bool validAddress = _formKeyAddress.currentState?.validate() ?? false;
+        if (validAddress) {
+          // _saveValues(_formKeyAddress);
 
-//   @override
-//   void dispose() {
-//     _organizationNameEC.dispose();
-//     _emailEC.dispose();
-//     _passwordEC.dispose();
-//     super.dispose();
-//   }
+          _currentStep < 2 ? setState(() => _currentStep += 1) : null;
+        }
+        break;
+      case 2:
+        // log(controller.organizationOpeningDays.isEmpty.toString());
+        // bool isOpeningAndClosingEqual = controller.organizationOpeningTime ==
+        //     controller.organizationClosingTime;
+        bool validAdditionalInfo =
+            (_formKeyAdditionalInfo.currentState?.validate() ?? false) &&
+                controller.organizationOpeningDays.isNotEmpty;
+        // bool validAdditionalInfo =
+        //     _formKeyAdditionalInfo.currentState?.validate() ?? false;
 
-//   Future<void> _exibirDialogSelecaoCategoria(BuildContext context) async {
-//     final categoriaSelecionada = await showDialog<OrganizationCategory>(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return SimpleDialog(
-//           title: const Text(
-//             'Selecione uma categoria',
-//             textAlign: TextAlign.center,
-//           ),
-//           children: OrganizationCategory.values
-//               .map((categoria) => SimpleDialogOption(
-//                     onPressed: () {
-//                       Navigator.pop(context, categoria);
-//                     },
-//                     child: Column(
-//                       children: [
-//                         Text(categoria.toString().split('.').last.capitalize()),
-//                         const Divider(),
-//                       ],
-//                     ),
-//                   ))
-//               .toList(),
-//         );
-//       },
-//     );
+        if (validAdditionalInfo) {
+          // _saveValues(_formKeyAdditionalInfo);
+          _currentStep < 3 ? setState(() => _currentStep += 1) : null;
+        } else if (controller.organizationOpeningDays.isEmpty) {
+          controller.errorOpeningDays =
+              "Você deve escolher ao menos um dia de funcionamento!";
+        }
+        break;
+      case 3:
+        bool confirmFormConfirm =
+            _formKeyConfirm.currentState?.validate() ?? false;
+        if (confirmFormConfirm) {
+          controller.registerOrganization();
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            "/welcome",
+            (Route<dynamic> route) => false,
+          );
+        }
+        break;
+    }
+  }
 
-//     if (categoriaSelecionada != null) {
-//       setState(() {
-//         _categoriaSelecionada = categoriaSelecionada;
-//         _categoriaFormFieldKey.currentState!.didChange(
-//             categoriaSelecionada.toString().split('.').last.capitalize());
-//       });
-//     }
-//   }
+  _stepCancel() {
+    _currentStep > 0 ? setState(() => _currentStep -= 1) : null;
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(
-//           "Cadastre sua Loja",
-//           style: context.textStyles.textTitle.copyWith(
-//             color: Colors.black,
-//           ),
-//         ),
-//         elevation: 0.5,
-//       ),
-//       body: SingleChildScrollView(
-//         child: Padding(
-//           padding: const EdgeInsets.symmetric(horizontal: 20),
-//           child: Form(
-//             key: _formKey,
-//             child: Column(
-//               children: [
-//                 const SizedBox(
-//                   height: 10,
-//                 ),
-//                 Text(
-//                   "Preencha os campos abaixo para cadastrar sua loja em nosso catálogo",
-//                   textAlign: TextAlign.justify,
-//                   style: context.textStyles.textMedium.copyWith(
-//                     fontSize: 16,
-//                   ),
-//                 ),
-//                 const SizedBox(height: 20),
-//                 TextFormField(
-//                   controller: _organizationNameEC,
-//                   decoration: const InputDecoration(labelText: "Nome da loja"),
-//                   validator: Validatorless.required("Nome da loja"),
-//                 ),
-//                 const SizedBox(height: 20),
-//                 TextFormField(
-//                   controller: _emailEC,
-//                   decoration: const InputDecoration(labelText: "E-mail"),
-//                   keyboardType: TextInputType.emailAddress,
-//                   validator: Validatorless.multiple(
-//                     [
-//                       Validatorless.required("E-mail obrigatório"),
-//                       Validatorless.email("E-mail inválido!"),
-//                     ],
-//                   ),
-//                 ),
-//                 const SizedBox(
-//                   height: 20,
-//                 ),
-//                 TextFormField(
-//                   key: _categoriaFormFieldKey,
-//                   readOnly: true,
-//                   onTap: () {
-//                     _exibirDialogSelecaoCategoria(context);
-//                   },
-//                   decoration: const InputDecoration(
-//                     labelText: 'Qual a categoria da sua loja?',
-//                     hintText: 'Selecione uma categoria',
-//                     suffixIcon: Icon(Icons.arrow_drop_down),
-//                   ),
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Selecione uma categoria';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 const SizedBox(
-//                   height: 20,
-//                 ),
-//                 TextFormField(
-//                   controller: _numberController,
-//                   keyboardType: TextInputType.number,
-//                   inputFormatters: [
-//                     FilteringTextInputFormatter.digitsOnly,
-//                     PhoneInputFormatter(),
-//                   ],
-//                   decoration: const InputDecoration(
-//                     labelText: 'Número para contato',
-//                   ),
-//                   validator: Validatorless.multiple(
-//                     [
-//                       Validatorless.required('Campo obrigatório'),
-//                       Validatorless.number('Número inválido'),
-//                       Validatorless.min(
-//                           10, 'Número deve ter pelo menos 10 dígitos'),
-//                     ],
-//                   ),
-//                 ),
-                // const SizedBox(height: 20),
-                // StatefulBuilder(
-                //   builder: (context, setState) => TextFormField(
-                //     obscureText: !_showPassword,
-                //     controller: _passwordEC,
-                //     decoration: InputDecoration(
-                //       labelText: "Senha",
-                //       suffixIcon: IconButton(
-                //         onPressed: () {
-                //           setState(() {
-                //             _showPassword = !_showPassword;
-                //           });
-                //         },
-                //         icon: Icon(
-                //           _showPassword
-                //               ? Icons.lock_open_rounded
-                //               : Icons.lock_outlined,
-                //         ),
-                //       ),
-                //     ),
-                //     validator: Validatorless.multiple(
-                //       [
-                //         Validatorless.required("Senha obrigatória"),
-                //         Validatorless.min(
-                //             6, "Senha deve conter ao menos 6 caracteries!"),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                // const SizedBox(height: 20),
-                // StatefulBuilder(
-                //   builder: (context, setState) => TextFormField(
-                //     obscureText: !_showPassword,
-                //     decoration: InputDecoration(
-                //       labelText: "Confirma senha",
-                //       suffixIcon: IconButton(
-                //         onPressed: () {
-                //           setState(() {
-                //             _showPassword = !_showPassword;
-                //           });
-                //         },
-                //         icon: Icon(
-                //           _showPassword
-                //               ? Icons.lock_open_rounded
-                //               : Icons.lock_outlined,
-                //         ),
-                //       ),
-                //     ),
-                //     validator: Validatorless.multiple(
-                //       [
-                //         Validatorless.required("Confirma senha obrigatória"),
-                //         Validatorless.min(6,
-                //             "Confirma senha deve conter ao menos 6 caracteries!"),
-                //         Validatorless.compare(
-                //             _passwordEC, "As senhas estão diferentes!"),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                // const SizedBox(
-                //   height: 20,
-                // ),
-//                 SizedBox(
-//                   width: 150,
-//                   height: 45,
-//                   child: ElevatedButton(
-//                     onPressed: () {},
-//                     child: const Text("Registrar loja"),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return CustomWillPopScope(
+      message: "Deseja voltar para o início?",
+      routeToBack: "/",
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "Cadastro",
+          ),
+          elevation: 0.5,
+        ),
+        body: Stepper(
+          type: StepperType.vertical,
+          elevation: 0.5,
+          currentStep: _currentStep,
+          // onStepTapped: (step) => _stepTapped(step),
+          onStepContinue: () => _stepContinue(),
+          onStepCancel: _stepCancel,
+          controlsBuilder: (BuildContext context, ControlsDetails details) {
+            return Column(
+              children: [
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  children: <Widget>[
+                    _currentStep == 3
+                        ? Center(
+                            child: SizedBox(
+                              width: 150,
+                              height: 40,
+                              child: FilledButton(
+                                onPressed: details.onStepContinue,
+                                child: const Text("Registrar"),
+                              ),
+                            ),
+                          )
+                        : FilledButton(
+                            onPressed: details.onStepContinue,
+                            child: const Text('Próximo'),
+                          ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    _currentStep == 3
+                        ? OutlinedButton(
+                            onPressed: details.onStepCancel,
+                            child: const Text(
+                              'Corrigir',
+                              style: TextStyle(),
+                            ),
+                          )
+                        : TextButton(
+                            onPressed: details.onStepCancel,
+                            child: const Text('Voltar'),
+                          ),
+                  ],
+                ),
+              ],
+            );
+          },
+          steps: [
+            Step(
+              state: _currentStep <= 0 ? StepState.editing : StepState.complete,
+              isActive: _currentStep >= 0,
+              title: Text(
+                "Informações Básicas",
+                style: context.textStyles.textTitle.copyWith(fontSize: 20),
+              ),
+              content: BasicInfosFormContent(
+                formKeyBasicInfos: _formKeyBasicInfos,
+              ),
+            ),
+            Step(
+              state: _currentStep <= 1 ? StepState.editing : StepState.complete,
+              isActive: _currentStep >= 1,
+              title: Text(
+                "Localização/Endereço",
+                style: context.textStyles.textTitle.copyWith(fontSize: 20),
+              ),
+              content: LocalizationFormContent(
+                formKeyAddress: _formKeyAddress,
+              ),
+            ),
+            Step(
+              state: _currentStep <= 2 ? StepState.editing : StepState.complete,
+              isActive: _currentStep >= 2,
+              title: Text(
+                "Informações Adicionais",
+                style: context.textStyles.textTitle.copyWith(fontSize: 20),
+              ),
+              content: AdditionalInfosFormContent(
+                formKeyAdditionalInfo: _formKeyAdditionalInfo,
+              ),
+            ),
+            Step(
+              state: _currentStep <= 3 ? StepState.editing : StepState.complete,
+              isActive: _currentStep >= 3,
+              title: Text(
+                "Confirmar Informações",
+                style: context.textStyles.textTitle.copyWith(fontSize: 20),
+              ),
+              content: ConfirmStep(
+                formKeyConfirm: _formKeyConfirm,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
