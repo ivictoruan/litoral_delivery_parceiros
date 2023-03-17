@@ -17,29 +17,31 @@ class SplashPage extends StatelessWidget {
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
             ),
-            child: FutureBuilder(
-              future:
-                  DefaultAssetBundle.of(context).loadString(homeAnimation),
-              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-                if (snapshot.hasData) {
-                  return LottieBuilder.asset(
-                    homeAnimation,
-                    fit: BoxFit.cover,
-                  );
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              },
+            child: Center(
+              child: FutureBuilder(
+                future:
+                    DefaultAssetBundle.of(context).loadString(homeAnimation),
+                builder:
+                    (BuildContext context, AsyncSnapshot<String> snapshot) {
+                  if (snapshot.hasData) {
+                    return LottieBuilder.asset(
+                      homeAnimation,
+                      width: context.screenWidth,
+                      height: 300,
+                      fit: BoxFit.cover,
+                    );
+                  } else {
+                    return const Column(
+                      children: [
+                        SizedBox(height: 261),
+                        Center(child: CircularProgressIndicator()),
+                      ],
+                    );
+                  }
+                },
+              ),
             ),
           ),
-          //   Lottie.asset(
-          //     homeAnimation,
-          //     width: context.screenWidth,
-          //     height: 300,
-          //     fit: BoxFit.cover,
-
-          //   // ),
-          // ),
           const SizedBox(
             height: 70,
           ),
@@ -76,9 +78,8 @@ class SplashPage extends StatelessWidget {
                       width: 165,
                       height: 50,
                       child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed("/auth/register");
-                        },
+                        onPressed: () =>
+                            Navigator.of(context).pushNamed("/auth/register"),
                         child: Text(
                           "Cadastre-se!",
                           style: context.textStyles.textBold.copyWith(
@@ -94,9 +95,8 @@ class SplashPage extends StatelessWidget {
                       width: 165,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).popAndPushNamed("/auth/login");
-                        },
+                        onPressed: () =>
+                            Navigator.of(context).pushNamed("/auth/login"),
                         child: Text(
                           "Entre",
                           style: context.textStyles.textBold.copyWith(
