@@ -81,20 +81,30 @@ Esta é a última etapa:
                         style: context.textStyles.textSemiBold,
                       ),
                       const SizedBox(height: 5),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
                         child: Align(
                           alignment: Alignment.bottomRight,
-                          child: IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {},
+                          child: CircleAvatar(
+                            maxRadius: 10,
+                            backgroundColor: Colors.black,
                           ),
-                          // CircleAvatar(
-                          //   maxRadius: 10,
-                          //   backgroundColor: Colors.black,
-                          // ),
                         ),
                       ),
+
+                      // Padding(
+                      //   padding: const EdgeInsets.all(8.0),
+                      //   child: Align(
+                      //     alignment: Alignment.bottomRight,
+                      //     child: IconButton(
+                      //       icon: const Icon(Icons.edit),
+                      //       onPressed: () {},
+                      //     ),
+                      //     // CircleAvatar(
+                      //     //   maxRadius: 10,
+                      //     //   backgroundColor: Colors.black,
+                      //     // ),
+                      //   ),
                     ],
                   ),
                 ),
