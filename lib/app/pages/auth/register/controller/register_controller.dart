@@ -1,18 +1,30 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../../../../models/address_model.dart';
 import '../../../../models/organization_model.dart';
+import '../../../../repositories/auth/auth_repository.dart';
 
 class RegisterController extends ChangeNotifier {
   final OrganizationModel organizationModel;
+  final AuthRepository _authRepository;
 
   // Mensagem de erro para o dia da semana
-  String errorOpeningDay = '';
+  String errorOpeningDays = '';
 
-
-  RegisterController({
+  RegisterController(
+    this._authRepository, {
     required this.organizationModel,
   });
+
+  Future<void> registerOrganization() async {
+    try {
+      await _authRepository.registerOrganization(organizationModel);
+    } catch (e, s) {
+      log("Erro ao registrar usuário", error: e, stackTrace: s);
+    }
+  }
 
   set organizationEmail(String newEmail) {
     organizationModel.email = newEmail;
@@ -89,8 +101,10 @@ class RegisterController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // organizationResponsibleName
-
+set organizationPassword(String newPassword) {
+    organizationModel.password = newPassword;
+    notifyListeners();
+  }
   String get organizationEmail => organizationModel.email;
 
   String get organizationName => organizationModel.name;
@@ -119,4 +133,6 @@ class RegisterController extends ChangeNotifier {
   String get organizationOpeningTime => organizationModel.openingTime;
 
   String get organizationClosingTime => organizationModel.closingTime;
+
+  String get organizationPassword => organizationModel.password;
 }
