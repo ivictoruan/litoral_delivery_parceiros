@@ -116,7 +116,7 @@ class _AdditionalInfosFormContentState
               Visibility(
                 visible: controller.organizationOpeningDays.isEmpty,
                 child: Text(
-                  controller.errorOpeningDay,
+                  controller.errorOpeningDays,
                   textAlign: TextAlign.center,
                   style: context.textStyles.textRegular.copyWith(
                     color: Colors.red,
@@ -335,7 +335,7 @@ class _AdditionalInfosFormContentState
     );
     if (pickedTime != null) {
       setState(() {
-        _closingTime = DateTime(
+        _closingTime = DateTime( 
           DateTime.now().year,
           DateTime.now().month,
           DateTime.now().day,
