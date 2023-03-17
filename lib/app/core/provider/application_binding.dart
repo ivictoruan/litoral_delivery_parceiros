@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../models/address_model.dart';
 import '../../models/organization_model.dart';
+import '../../pages/auth/login/controller/login_controller.dart';
 import '../../pages/auth/register/controller/register_controller.dart';
+import '../../pages/product_registration/controller/product_registration_controller_impl.dart';
 import '../../repositories/auth/auth_repository.dart';
 import '../../repositories/auth/auth_repository_impl.dart';
 import '../rest_client/custom_dio.dart';
@@ -30,8 +32,19 @@ class ApplicationBinding extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => RegisterController(
+            context.read<AuthRepository>(),
             organizationModel: OrganizationModel(address: AddressModel()),
           ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => LoginController(
+              // context.read<AuthRepository>(),
+              ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ProductRegistrationControllerImpl(
+              // context.read<AuthRepository>(),
+              ),
         ),
       ],
       child: child,
